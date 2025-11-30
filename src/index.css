@@ -1,21 +1,205 @@
 :root {
-  --bg: #0f172a;
-  --card: #111827;
-  --accent: #0ea5e9;
+  /* palette moderne */
+  --bg-a: #0b1020; /* deep night */
+  --bg-b: #001427; /* teal midnight */
+  --card: rgba(255,255,255,0.04);
+  --glass: rgba(255,255,255,0.06);
+  --accent: #7ee7ff; /* cyan accent */
+  --accent-2: #8b5cf6; /* purple */
+  --muted: rgba(230,238,246,0.7);
   --text: #e6eef6;
+  --glass-border: rgba(255,255,255,0.08);
+  --shadow: 0 10px 30px rgba(2,6,23,0.6);
+  --glass-blur: 10px;
 }
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+/* fonts: try to use modern rounded fonts — falls back to system if unavailable */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;600;700&display=swap');
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: linear-gradient(135deg, var(--bg), #001227);
+  font-family: Poppins, Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(120, 80, 255, 0.12), transparent),
+              radial-gradient(1200px 600px at 90% 90%, rgba(0, 230, 255, 0.06), transparent),
+              linear-gradient(140deg, var(--bg-a) 0%, var(--bg-b) 60%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
-.app-root { max-width: 900px; margin: 48px auto; padding: 28px; background: rgba(255,255,255,0.02); border-radius: 10px; }
-.app-header h1 { margin: 0 0 8px; font-size: 1.6rem; color: var(--accent); }
-.app-header p { margin: 0 0 16px; opacity: 0.85; }
+/* main glass card */
+.app-root {
+  width: min(1100px, 98%);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(20px, 2.5vw, 44px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+  transform: translateY(-8px) scale(1);
+  transition: transform 300ms ease, box-shadow 300ms ease;
+  /* taille minimale pour garder un rendu lisible */
+  min-width: 320px;
+  min-height: 360px;
+}
+
+.app-root:hover { transform: translateY(-10px) scale(1.006); box-shadow: 0 18px 50px rgba(0,0,0,0.65); }
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.2vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: linear-gradient(90deg, var(--accent), var(--accent-2));
+  background: linear-gradient(92deg, var(--accent) 8%, var(--accent-2) 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-header p { margin: 0; color: var(--muted); font-weight: 400; }
 
 code { background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 6px; }
+
+/* --- layout refinements for the main content --- */
+main { width: 100%; }
+main section { display: block; margin: 0 auto; }
+
+/* form grid — tries to override inline style grid on App.tsx */
+main section > div:first-of-type {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px !important;
+}
+
+@media (max-width: 720px) {
+  main section > div:first-of-type { grid-template-columns: 1fr !important; }
+}
+
+/* inputs modern look — override inline styles using !important */
+input[type="number"] {
+  -webkit-appearance: none;
+  appearance: none;
+  /* plus compact */
+  /* ultra-compact inputs */
+  padding: 4px 8px !important;
+  width: min(100%, 260px) !important;
+  font-size: 0.82rem;
+  line-height: 1.15;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 6px !important;
+  /* éclaircir la bordure pour un meilleur contraste */
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: inset 0 1px 6px rgba(0,0,0,0.45), 0 4px 12px rgba(2,6,23,0.28);
+  color: var(--text) !important;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  font-weight: 600;
+}
+
+/* class used by the Textbox component - keeps the same visual style as the inputs above */
+.app-textbox {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 4px 8px !important;
+  width: 100% !important;
+  font-size: 0.82rem;
+  line-height: 1.15;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 6px !important;
+  /* bordure légèrement plus claire */
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: inset 0 1px 6px rgba(0,0,0,0.45), 0 4px 12px rgba(2,6,23,0.28);
+  color: var(--text) !important;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  font-weight: 600;
+}
+
+.app-textbox:focus {
+  outline: none !important;
+  transform: translateY(-0.25px) !important;
+  border-color: rgba(126,231,255,0.95) !important;
+  box-shadow: 0 6px 24px rgba(0, 150, 200, 0.08), 0 0 18px rgba(126,231,255,0.12) !important;
+}
+
+.app-textbox:focus-visible { box-shadow: 0 0 0 2px rgba(126,231,255,0.12) !important; }
+
+input[type="number"]:focus {
+  outline: none !important;
+  transform: translateY(-0.25px) !important;
+  border-color: rgba(126,231,255,0.95) !important;
+  box-shadow: 0 4px 18px rgba(0, 150, 200, 0.06), 0 0 10px rgba(126,231,255,0.06) !important;
+}
+
+label { display: block; margin-bottom: 6px; color: var(--muted); font-weight: 600; }
+
+/* stats block */
+.app-root .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+@media (max-width: 720px) { .app-root .stats { grid-template-columns: 1fr; } }
+
+.app-root .stats > div {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 6px 18px rgba(2,6,23,0.45);
+}
+
+.app-root strong { display: block; font-weight: 700; color: var(--muted); }
+
+.app-root hr { border: 0; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.06)); margin: 20px 0; }
+
+/* small helper and elapsed seconds */
+.app-root .elapsed { font-size: 12px; color: rgba(230,238,246,0.6); margin-top: 6px; }
+
+/* make the dynamic amount look like a neon counter */
+.app-root .neon {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 1.2rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 6px 30px rgba(139,92,246,0.06), 0 0 18px rgba(126,231,255,0.04);
+}
+
+/* tiny animation to give life to changing values */
+.pulse {
+  animation: pulse 1.1s infinite ease-in-out;
+}
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+
+/* responsive padding within the page */
+@media (max-width: 480px) {
+  .app-root { padding: 18px; border-radius: 14px; }
+  .app-root { min-width: 280px; min-height: 300px; }
+  .app-header h1 { font-size: 1.3rem; }
+}
+
+/* subtle focus rings for accessibility */
+input[type="number"]:focus-visible { box-shadow: 0 0 0 1.5px rgba(126,231,255,0.06) !important; }
+
+/* helper: reduce label -> input distance on small screens */
+main section > div > label { font-size: 0.86rem; }
+
+@media (min-width: 960px) {
+  /* on wide screens, inputs will be inline-friendly and not stretch full width */
+  main section > div { align-items: center; display: flex; gap: 10px; }
+  main section > div > input[type="number"] { width: 180px !important; }
+}
+

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { formatDhms, secondsToDhms, secondsToEarnAmount } from './utils/time'
+import Textbox from './components/Textbox'
 
 export default function App(): React.ReactElement {
   // Salaire annuel brut en dollars USD — valeur initiale 1 000 000
@@ -9,6 +11,8 @@ export default function App(): React.ReactElement {
   const [vacationDays, setVacationDays] = useState<number>(25)
   // Temps de travail par jour (heures) — valeur initiale 8
   const [hoursPerDay, setHoursPerDay] = useState<number>(8)
+  // montant cible entré par l'utilisateur
+  const [targetAmount, setTargetAmount] = useState<number>(1000)
 
   const formatUsd = (value: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
@@ -61,14 +65,19 @@ export default function App(): React.ReactElement {
 
   const amountSinceArrival = amountSinceArrivalState
 
+  // temps nécessaire (en secondes) pour gagner le montant ciblé selon le salaire net et les ms travaillés par an
+  const secondsNeededForTarget = secondsToEarnAmount(targetAmount, netAnnual, workingMsPerYear)
+  const targetTimeLabel = (!isFinite(secondsNeededForTarget) || secondsNeededForTarget < 0)
+    ? 'N/A'
+    : `${formatDhms(Math.ceil(secondsNeededForTarget), hoursPerDay)} (${Math.ceil(secondsNeededForTarget)}s)`
+
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>Bienvenue — Whatswrongwithmylife (Vite + React + TypeScript)</h1>
-        <p>Application de démarrage créée automatiquement.</p>
+        <h1>Whats wrong with my life</h1>
       </header>
       <main>
-        <section style={{ maxWidth: 720, margin: '1rem auto' }}>
+        <section style={{ minWidth: 720, margin: '1rem auto' }}>
           {/* Contrôles regroupés : salaire, taux d'imposition, jours de congé */}
           <div
             style={{
@@ -78,67 +87,64 @@ export default function App(): React.ReactElement {
               marginBottom: 6,
             }}
           >
-            <div>
-              <label htmlFor="salary-input" style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-                Salaire annuel brut (USD)
-              </label>
-              <input
-                id="salary-input"
-                type="number"
-                step={1000}
-                min={0}
-                value={salary}
-                onChange={(e: any) => setSalary(Number(e.target.value) || 0)}
-                style={{ padding: '0.5rem 0.6rem', width: '100%', boxSizing: 'border-box' }}
-              />
-            </div>
+            <Textbox
+              id="salary-input"
+              label="Salaire annuel brut (USD)"
+              type="number"
+              step={1000}
+              min={0}
+              value={salary}
+              onChange={(v) => setSalary(Number(v) || 0)}
+            />
 
-            <div>
-              <label htmlFor="tax-input" style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-                Taux d'imposition (%)
-              </label>
-              <input
-                id="tax-input"
-                type="number"
-                step={0.1}
-                min={0}
-                max={100}
-                value={taxRate}
-                onChange={(e: any) => setTaxRate(Number(e.target.value) || 0)}
-                style={{ padding: '0.5rem 0.6rem', width: '100%', boxSizing: 'border-box' }}
-              />
-            </div>
+            <Textbox
+              id="tax-input"
+              label="Taux d'imposition (%)"
+              type="number"
+              step={0.1}
+              min={0}
+              max={100}
+              value={taxRate}
+              onChange={(v) => setTaxRate(Number(v) || 0)}
+            />
 
-            <div>
-              <label htmlFor="vacation-input" style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-                Nombre de jours de congé
-              </label>
-              <input
-                id="vacation-input"
-                type="number"
-                step={1}
-                min={0}
-                max={365}
-                value={vacationDays}
-                onChange={(e: any) => setVacationDays(Number(e.target.value) || 0)}
-                style={{ padding: '0.5rem 0.6rem', width: '100%', boxSizing: 'border-box' }}
-              />
-            </div>
+            <Textbox
+              id="vacation-input"
+              label="Nombre de jours de congé"
+              type="number"
+              step={1}
+              min={0}
+              max={365}
+              value={vacationDays}
+              onChange={(v) => setVacationDays(Number(v) || 0)}
+            />
 
-            <div>
-              <label htmlFor="hours-input" style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>
-                Temps de travail par jour (heures)
-              </label>
-              <input
-                id="hours-input"
-                type="number"
-                step={0.5}
-                min={0}
-                max={24}
-                value={hoursPerDay}
-                onChange={(e: any) => setHoursPerDay(Number(e.target.value) || 0)}
-                style={{ padding: '0.5rem 0.6rem', width: '100%', boxSizing: 'border-box' }}
-              />
+            <Textbox
+              id="hours-input"
+              label="Temps de travail par jour (heures)"
+              type="number"
+              step={0.5}
+              min={0}
+              max={24}
+              value={hoursPerDay}
+              onChange={(v) => setHoursPerDay(Number(v) || 0)}
+            />
+
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+              <div style={{ flex: 1 }}>
+                <Textbox
+                  id="target-input"
+                  label="Montant cible (USD)"
+                  type="number"
+                  step={1}
+                  min={0}
+                  value={targetAmount}
+                  onChange={(v) => setTargetAmount(Number(v) || 0)}
+                />
+              </div>
+              <div style={{ fontSize: 13, color: '#333', minWidth: 160 }} aria-live="polite">
+                {targetTimeLabel}
+              </div>
             </div>
           </div>
 
@@ -149,40 +155,51 @@ export default function App(): React.ReactElement {
 
             <div>
               <strong>Montant perçu depuis l'arrivée :</strong> {formatUsdCents(amountSinceArrival)}
-              <div style={{ fontSize: 12, color: '#666' }}>{(elapsedMs / 1000).toFixed(1)} secondes écoulées</div>
+              <div style={{ fontSize: 12, color: '#666' }}>
+                {/* breakdown détaillé (affiche une seule fois) */}
+                <div style={{ fontSize: 11, color: '#888' }}>
+                  {(() => {
+                    const parts = secondsToDhms(Math.floor(elapsedMs / 1000), hoursPerDay)
+                    return `${parts.days}j ${parts.hours}h ${parts.minutes}m ${parts.seconds}s`
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Temps nécessaire pour atteindre un montant cible */}
+            <div>
+              <strong>Temps pour gagner </strong>{' '}
+              <span style={{ fontWeight: 700 }}>{formatUsd(targetAmount)}</span>
+              <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
+                {(() => {
+                  const secondsNeeded = secondsToEarnAmount(targetAmount, netAnnual, workingMsPerYear)
+                  if (!isFinite(secondsNeeded) || secondsNeeded < 0) return 'N/A'
+                  // arrondir vers le haut pour être conservateur
+                  return `${formatDhms(Math.ceil(secondsNeeded), hoursPerDay)} (${Math.ceil(secondsNeeded)}s)`
+                })()}
+              </div>
             </div>
 
             {/* Le rappel du taux d'imposition a été supprimé (l'input reste) */}
 
-            <div>
-              <strong>Salaire net estimé :</strong>{' '}
-              {formatUsd(Math.round(salary * (1 - taxRate / 100)))}
-            </div>
+            {/* 'Salaire net estimé' supprimé car doublon — on garde 'Salaire annuel net estimé' plus bas */}
 
-            <div>
-              <strong>Jours de congé :</strong> {vacationDays}
-            </div>
+            {/* rappel du nombre de jours de congé supprimé (input conservé) */}
 
-            <div>
-              <strong>Jours ouvrés estimés par an (excl. weekends):</strong> {WORKING_DAYS_PER_YEAR}
-            </div>
+            {/* rappel des jours ouvrés supprimé (inclut weekends logique gardée) */}
 
-            <div>
-              <strong>Jours ouvrés restants (après congés):</strong> {effectiveWorkingDays}
-            </div>
+            {/* rappel des jours ouvrés restants supprimé (logique conservée) */}
 
             <div>
               <strong>Salaire annuel net estimé :</strong> {formatUsd(netAnnual)}
             </div>
 
             <div>
-              <strong>Salaire journalier net (en tenant compte des weekends & congés):</strong>{' '}
+              <strong>Salaire journalier net :</strong>{' '}
               {effectiveWorkingDays > 0 ? formatUsd(netPerWorkday) : 'N/A'}
             </div>
 
-            <div>
-              <strong>Temps de travail par jour (heures):</strong> {hoursPerDay}
-            </div>
+            {/* rappel des heures de travail supprimé (input conservé) */}
 
             <div>
               <strong>Salaire horaire net (estimation) :</strong>{' '}
@@ -191,10 +208,6 @@ export default function App(): React.ReactElement {
           </div>
 
           {/* plus d'inputs — tout est géré dans le groupe ci-dessus */}
-
-          <hr style={{ margin: '1.2rem 0' }} />
-
-          <p>Éditez <code>src/App.tsx</code> pour ajuster ou styliser davantage l'input.</p>
         </section>
       </main>
     </div>
