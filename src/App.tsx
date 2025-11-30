@@ -130,7 +130,7 @@ export default function App(): React.ReactElement {
               onChange={(v) => setHoursPerDay(Number(v) || 0)}
             />
 
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <Textbox
                   id="target-input"
@@ -142,8 +142,11 @@ export default function App(): React.ReactElement {
                   onChange={(v) => setTargetAmount(Number(v) || 0)}
                 />
               </div>
-              <div style={{ fontSize: 13, color: '#333', minWidth: 160 }} aria-live="polite">
-                {targetTimeLabel}
+              <div style={{ fontSize: 13, color: '#333', minWidth: 260 }} aria-live="polite">
+                <div style={{ fontSize: 13 }}>
+                  <strong>Temps pour gagner</strong>
+                </div>
+                <div style={{ fontWeight: 700, marginTop: 2 }}>{targetTimeLabel}</div>
               </div>
             </div>
           </div>
@@ -166,19 +169,7 @@ export default function App(): React.ReactElement {
               </div>
             </div>
 
-            {/* Temps nécessaire pour atteindre un montant cible */}
-            <div>
-              <strong>Temps pour gagner </strong>{' '}
-              <span style={{ fontWeight: 700 }}>{formatUsd(targetAmount)}</span>
-              <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
-                {(() => {
-                  const secondsNeeded = secondsToEarnAmount(targetAmount, netAnnual, workingMsPerYear)
-                  if (!isFinite(secondsNeeded) || secondsNeeded < 0) return 'N/A'
-                  // arrondir vers le haut pour être conservateur
-                  return `${formatDhms(Math.ceil(secondsNeeded), hoursPerDay)} (${Math.ceil(secondsNeeded)}s)`
-                })()}
-              </div>
-            </div>
+            {/* 'Temps pour gagner' déplacé à côté de l'input 'Montant cible' */}
 
             {/* Le rappel du taux d'imposition a été supprimé (l'input reste) */}
 
